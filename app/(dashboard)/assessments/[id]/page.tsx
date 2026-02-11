@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Edit, Trash2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,13 +56,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
     params.then(setResolvedParams);
   }, [params]);
 
-  useEffect(() => {
-    if (resolvedParams) {
-      fetchAssessment();
-    }
-  }, [resolvedParams]);
-
-  const fetchAssessment = async () => {
+  const fetchAssessment = useCallback(async () => {
     if (!resolvedParams) return;
     
     try {
@@ -79,7 +73,13 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
     } finally {
       setLoading(false);
     }
-  };
+  }, [resolvedParams, router]);
+
+  useEffect(() => {
+    if (resolvedParams) {
+      fetchAssessment();
+    }
+  }, [resolvedParams, fetchAssessment]);
 
   const handlePublish = async () => {
     if (!resolvedParams || !assessment) return;

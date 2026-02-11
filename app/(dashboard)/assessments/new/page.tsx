@@ -52,7 +52,7 @@ export default function NewAssessmentPage() {
       
       // Collect competencies from form
       const competenciesData = competencies
-        .map((comp, index) => {
+        .map((comp) => {
           const name = (document.getElementById(`competency-name-${comp.id}`) as HTMLInputElement)?.value;
           const description = (document.getElementById(`competency-desc-${comp.id}`) as HTMLInputElement)?.value;
           return name ? { name, description: description || undefined } : null;
