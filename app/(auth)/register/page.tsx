@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,22 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/login?registered=true");
+      // Auto-login after successful registration
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        // Registration succeeded but login failed - redirect to login page
+        router.push("/login?registered=true");
+        return;
+      }
+
+      // Successfully registered and logged in - redirect to dashboard
+      router.push("/dashboard");
+      router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
       setIsLoading(false);
