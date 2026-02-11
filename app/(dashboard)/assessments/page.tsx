@@ -69,9 +69,6 @@ export default function AssessmentsPage() {
   };
 
   return (
-    createdAt: "2025-01-10",
-  },
-  {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
