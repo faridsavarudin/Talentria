@@ -18,12 +18,6 @@ enum UserRole {
   CANDIDATE
 }
 
-enum OrgPlan {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
 enum AssessmentStatus {
   DRAFT
   ACTIVE
@@ -56,8 +50,6 @@ model Organization {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  logo      String?
-  plan      OrgPlan  @default(FREE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -76,11 +68,11 @@ model User {
   image          String?
   password       String?
   role           UserRole  @default(RECRUITER)
-  organizationId String?
+  organizationId String
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   accounts     Account[]
   sessions     Session[]
 
