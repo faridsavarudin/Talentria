@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type AssessmentItem = {
   id: string;
@@ -28,11 +28,7 @@ export default function AssessmentsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  useEffect(() => {
-    fetchAssessments();
-  }, [statusFilter]);
-
-  const fetchAssessments = async () => {
+  const fetchAssessments = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -49,7 +45,11 @@ export default function AssessmentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, search]);
+
+  useEffect(() => {
+    fetchAssessments();
+  }, [fetchAssessments]);
 
   const handleSearch = () => {
     fetchAssessments();

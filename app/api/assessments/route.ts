@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         organizationId: (session.user as Record<string, unknown>).organizationId as string,
         createdById: session.user.id as string,
         competencies: {
-          create: competencies.map((comp, index) => ({
+          create: competencies.map((comp) => ({
             name: comp.name,
             description: comp.description,
           })),
