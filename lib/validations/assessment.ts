@@ -12,7 +12,7 @@ export const rubricLevelSchema = z.object({
 export const questionSchema = z.object({
   content: z.string().min(10, "Question must be at least 10 characters"),
   type: z.enum(["BEHAVIORAL", "SITUATIONAL", "TECHNICAL"]),
-  order: z.number().default(0),
+  order: z.number().optional(),
   rubricLevels: z.array(rubricLevelSchema).optional(),
 });
 
