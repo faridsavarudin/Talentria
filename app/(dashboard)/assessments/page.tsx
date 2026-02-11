@@ -6,81 +6,72 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type AssessmentItem = {
   id: string;
   title: string;
   jobTitle: string;
-  department: string;
+  department: string | null;
   status: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  questionsCount: number;
-  interviewsCount: number;
   createdAt: string;
-};
-
-const mockAssessments: AssessmentItem[] = [
-  {
-    id: "1",
-    title: "Senior Frontend Engineer Assessment",
-    jobTitle: "Senior Frontend Engineer",
-    department: "Engineering",
-    status: "ACTIVE",
-    questionsCount: 8,
-    interviewsCount: 5,
-    createdAt: "2025-01-15",
-  },
-  {
-    id: "2",
-    title: "Product Manager Interview Guide",
-    jobTitle: "Product Manager",
-    department: "Product",
-    status: "DRAFT",
-    questionsCount: 6,
-    interviewsCount: 0,
-    createdAt: "2025-01-20",
-  },
-  {
-    id: "3",
-    title: "Data Scientist Evaluation",
-    jobTitle: "Data Scientist",
-    department: "Data",
-    status: "ACTIVE",
-    questionsCount: 10,
-    interviewsCount: 7,
-    createdAt: "2025-01-10",
-  },
-  {
-    id: "4",
-    title: "UX Designer Assessment",
-    jobTitle: "UX Designer",
-    department: "Design",
-    status: "ARCHIVED",
-    questionsCount: 7,
-    interviewsCount: 12,
-    createdAt: "2024-12-01",
-  },
-];
-
-const statusColors = {
-  DRAFT: "warning" as const,
-  ACTIVE: "success" as const,
-  ARCHIVED: "secondary" as const,
+  _count: {
+    questions: number;
+    interviews: number;
+    competencies: number;
+  };
 };
 
 export default function AssessmentsPage() {
+  const [assessments, setAssessments] = useState<AssessmentItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const filtered = mockAssessments.filter((a) => {
-    const matchesSearch =
-      a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.jobTitle.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "ALL" || a.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  useEffect(() => {
+    fetchAssessments();
+  }, [statusFilter]);
+
+  const fetchAssessments = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (statusFilter) params.append("status", statusFilter);
+      if (search) params.append("search", search);
+      
+      const response = await fetch(`/api/assessments?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAssessments(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch assessments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchAssessments();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-800";
+      case "DRAFT":
+        return "bg-yellow-100 text-yellow-800";
+      case "ARCHIVED":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-blue-100 text-blue-800";
+    }
+  };
 
   return (
+    createdAt: "2025-01-10",
+  },
+  {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -105,64 +96,100 @@ export default function AssessmentsPage() {
             placeholder="Search assessments..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="pl-10"
           />
         </div>
+        <Button onClick={handleSearch} variant="outline" size="sm">
+          Search
+        </Button>
         <div className="flex gap-2">
-          {["ALL", "ACTIVE", "DRAFT", "ARCHIVED"].map((status) => (
+          {["", "ACTIVE", "DRAFT", "ARCHIVED"].map((status) => (
             <Button
               key={status}
               variant={statusFilter === status ? "default" : "outline"}
               size="sm"
               onClick={() => setStatusFilter(status)}
             >
-              {status === "ALL" ? "All" : status.charAt(0) + status.slice(1).toLowerCase()}
+              {status === "" ? "All" : status.charAt(0) + status.slice(1).toLowerCase()}
             </Button>
           ))}
         </div>
       </div>
 
       {/* Assessment Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((assessment) => (
-          <Card key={assessment.id} className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-base">{assessment.title}</CardTitle>
-                <Badge variant={statusColors[assessment.status]}>
-                  {assessment.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>Job Title</span>
-                  <span className="font-medium text-foreground">{assessment.jobTitle}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Department</span>
-                  <span className="font-medium text-foreground">{assessment.department}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Questions</span>
-                  <span className="font-medium text-foreground">{assessment.questionsCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Interviews</span>
-                  <span className="font-medium text-foreground">{assessment.interviewsCount}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading assessments...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {assessments.map((assessment) => (
+            <Link key={assessment.id} href={`/assessments/${assessment.id}`}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base line-clamp-2">{assessment.title}</CardTitle>
+                    <Badge className={getStatusColor(assessment.status)}>
+                      {assessment.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Job Title</span>
+                      <span className="font-medium text-foreground truncate ml-2">{assessment.jobTitle}</span>
+                    </div>
+                    {assessment.department && (
+                      <div className="flex justify-between">
+                        <span>Department</span>
+                        <span className="font-medium text-foreground truncate ml-2">{assessment.department}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span>Competencies</span>
+                      <span className="font-medium text-foreground">{assessment._count.competencies}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Questions</span>
+                      <span className="font-medium text-foreground">{assessment._count.questions}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Interviews</span>
+                      <span className="font-medium text-foreground">{assessment._count.interviews}</span>
+                    </div>
+                    <div className="flex justify-between text-xs pt-2 border-t">
+                      <span>Created</span>
+                      <span className="font-medium text-foreground">
+                        {new Date(assessment.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
 
-      {filtered.length === 0 && (
+      {!loading && assessments.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <Filter className="h-12 w-12 text-muted-foreground/50 mb-4" />
           <h3 className="text-lg font-semibold">No assessments found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filters.</p>
+          <p className="text-muted-foreground mb-4">
+            {search || statusFilter 
+              ? "Try adjusting your search or filters." 
+              : "Get started by creating your first assessment."}
+          </p>
+          {!search && !statusFilter && (
+            <Link href="/assessments/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Assessment
+              </Button>
+            </Link>
+          )}
         </div>
       )}
     </div>
