@@ -95,6 +95,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        {/* Google OAuth - Temporarily disabled
         <div className="relative my-4">
           <Separator />
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
@@ -127,6 +128,7 @@ export default function LoginPage() {
           </svg>
           Continue with Google
         </Button>
+        */}
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
