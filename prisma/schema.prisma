@@ -1,0 +1,372 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  RECRUITER
+  EVALUATOR
+  CANDIDATE
+}
+
+enum OrgPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum AssessmentStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum QuestionType {
+  BEHAVIORAL
+  SITUATIONAL
+  TECHNICAL
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PanelRole {
+  LEAD
+  MEMBER
+}
+
+// ============================================
+// AUTH & USERS
+// ============================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  plan      OrgPlan  @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  assessments Assessment[]
+  candidates  Candidate[]
+
+  @@index([slug])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  role           UserRole  @default(RECRUITER)
+  organizationId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  accounts     Account[]
+  sessions     Session[]
+
+  assessmentsCreated Assessment[]
+  evaluations        Evaluation[]
+  interviewPanels    InterviewPanel[]
+  calibrationAttempts CalibrationAttempt[]
+  reliabilityScores  ReliabilityScore[]
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// ASSESSMENTS
+// ============================================
+
+model Assessment {
+  id             String           @id @default(cuid())
+  title          String
+  description    String?          @db.Text
+  jobTitle       String
+  jobDescription String           @db.Text
+  department     String?
+  status         AssessmentStatus @default(DRAFT)
+  organizationId String
+  createdById    String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy    User         @relation(fields: [createdById], references: [id])
+
+  competencies Competency[]
+  questions    Question[]
+  interviews   Interview[]
+  biasReports  BiasReport[]
+  reliabilityScores ReliabilityScore[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
+}
+
+model Competency {
+  id           String @id @default(cuid())
+  name         String
+  description  String? @db.Text
+  assessmentId String
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questions  Question[]
+  calibrationExercises CalibrationExercise[]
+
+  @@index([assessmentId])
+}
+
+model Question {
+  id           String       @id @default(cuid())
+  content      String       @db.Text
+  type         QuestionType
+  competencyId String
+  assessmentId String
+  order        Int          @default(0)
+
+  competency  Competency   @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  assessment  Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  rubricLevels RubricLevel[]
+  evaluations  Evaluation[]
+
+  @@index([assessmentId])
+  @@index([competencyId])
+}
+
+model RubricLevel {
+  id                String @id @default(cuid())
+  questionId        String
+  level             Int // 1-5
+  label             String // e.g., "Exceeds Expectations"
+  description       String @db.Text
+  behavioralAnchors Json // Array of behavioral indicators
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, level])
+  @@index([questionId])
+}
+
+// ============================================
+// INTERVIEWS & EVALUATIONS
+// ============================================
+
+model Candidate {
+  id             String   @id @default(cuid())
+  name           String
+  email          String
+  phone          String?
+  resumeUrl      String?
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  organization Organization      @relation(fields: [organizationId], references: [id])
+  interviews   Interview[]
+  feedbacks    CandidateFeedback[]
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Interview {
+  id           String          @id @default(cuid())
+  assessmentId String
+  candidateId  String
+  status       InterviewStatus @default(SCHEDULED)
+  scheduledAt  DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime        @default(now())
+
+  assessment Assessment        @relation(fields: [assessmentId], references: [id])
+  candidate  Candidate          @relation(fields: [candidateId], references: [id])
+  panels     InterviewPanel[]
+  evaluations Evaluation[]
+  feedbacks  CandidateFeedback[]
+
+  @@index([assessmentId])
+  @@index([candidateId])
+  @@index([status])
+}
+
+model InterviewPanel {
+  id          String    @id @default(cuid())
+  interviewId String
+  evaluatorId String
+  role        PanelRole @default(MEMBER)
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  evaluator User      @relation(fields: [evaluatorId], references: [id])
+
+  @@unique([interviewId, evaluatorId])
+  @@index([evaluatorId])
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  interviewId String
+  evaluatorId String
+  questionId  String
+  score       Int // 1-5
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  evaluator User      @relation(fields: [evaluatorId], references: [id])
+  question  Question  @relation(fields: [questionId], references: [id])
+
+  @@unique([interviewId, evaluatorId, questionId])
+  @@index([interviewId])
+  @@index([evaluatorId])
+  @@index([questionId])
+}
+
+// ============================================
+// CANDIDATE FEEDBACK
+// ============================================
+
+model CandidateFeedback {
+  id               String    @id @default(cuid())
+  interviewId      String
+  candidateId      String
+  competencyScores Json // { competencyName: score }
+  overallScore     Float
+  summary          String?   @db.Text
+  generatedAt      DateTime  @default(now())
+  sentAt           DateTime?
+
+  interview Interview @relation(fields: [interviewId], references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  @@index([interviewId])
+  @@index([candidateId])
+}
+
+// ============================================
+// CALIBRATION
+// ============================================
+
+model CalibrationExercise {
+  id              String @id @default(cuid())
+  title           String
+  competencyId    String
+  videoUrl        String?
+  description     String @db.Text
+  sampleResponse  String @db.Text
+  expertScore     Int // 1-5
+  expertRationale String @db.Text
+  createdAt       DateTime @default(now())
+
+  competency Competency          @relation(fields: [competencyId], references: [id])
+  attempts   CalibrationAttempt[]
+
+  @@index([competencyId])
+}
+
+model CalibrationAttempt {
+  id           String   @id @default(cuid())
+  exerciseId   String
+  evaluatorId  String
+  score        Int // 1-5
+  feedback     String?  @db.Text
+  isCalibrated Boolean  @default(false) // within 0.5 of expert score
+  attemptedAt  DateTime @default(now())
+
+  exercise  CalibrationExercise @relation(fields: [exerciseId], references: [id])
+  evaluator User                @relation(fields: [evaluatorId], references: [id])
+
+  @@index([exerciseId])
+  @@index([evaluatorId])
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model BiasReport {
+  id           String   @id @default(cuid())
+  assessmentId String
+  reportData   Json // { demographics, passRates, adverseImpact, etc. }
+  generatedAt  DateTime @default(now())
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+
+  @@index([assessmentId])
+}
+
+model ReliabilityScore {
+  id           String   @id @default(cuid())
+  assessmentId String
+  evaluatorId  String
+  icc          Float // Intraclass Correlation Coefficient
+  meanScore    Float
+  stdDev       Float
+  sampleSize   Int
+  calculatedAt DateTime @default(now())
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  evaluator  User       @relation(fields: [evaluatorId], references: [id])
+
+  @@index([assessmentId])
+  @@index([evaluatorId])
+}
