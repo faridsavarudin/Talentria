@@ -184,6 +184,13 @@ export default function AIInterviewPage() {
     conversationHistoryRef.current = transcript;
   }, [transcript]);
 
+  // Assign camera stream to video element once it renders into the DOM
+  useEffect(() => {
+    if (videoRef.current && streamRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [stage]);
+
   // ── Load session ──────────────────────────────────────────
 
   useEffect(() => {

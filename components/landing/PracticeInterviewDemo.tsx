@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import Link from "next/link";
-import { Mic, ArrowRight } from "lucide-react";
+import { Mic, ArrowRight, UserCircle2 } from "lucide-react";
 
 const DEMO_QUESTIONS = [
   "Tell me about yourself and your background.",
@@ -32,52 +32,95 @@ export function PracticeInterviewDemo() {
           A 4-question AI-conducted interview. No scheduling. No judgment. Just practice.
         </p>
 
-        {/* Interview-in-progress card */}
+        {/* Interview-in-progress card — split-screen video interview mockup */}
         <div
-          className="rounded-2xl border p-6 max-w-lg mb-10"
-          style={{ backgroundColor: "#292524", borderColor: "#44403C" }}
-          aria-label="AI Interview interface preview"
+          className="rounded-2xl border overflow-hidden max-w-2xl mb-10"
+          style={{ backgroundColor: "#0d0d0d", borderColor: "#44403C" }}
+          aria-label="AI Video Interview interface preview"
           role="img"
         >
-          {/* LIVE indicator */}
-          <div className="flex items-center gap-1.5 text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded w-fit mb-5">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-            LIVE
+          {/* Header bar */}
+          <div
+            className="flex items-center justify-between px-4 py-2.5 border-b"
+            style={{ backgroundColor: "#292524", borderColor: "#44403C" }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                LIVE
+              </div>
+              <span className="text-xs text-stone-400">Question 1 of 4</span>
+            </div>
+            <span className="text-xs text-stone-500 font-mono tabular-nums">0:42</span>
           </div>
 
-          {/* AI avatar + waveform */}
-          <div className="flex flex-col items-start gap-2 mb-5">
-            <div className="flex items-center gap-3">
+          {/* Split screen */}
+          <div className="flex">
+            {/* Left: candidate video feed */}
+            <div className="w-1/2 bg-black flex items-center justify-center relative" style={{ minHeight: "200px" }}>
+              {/* Person silhouette placeholder */}
+              <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                <div className="h-16 w-16 rounded-full bg-stone-800 flex items-center justify-center">
+                  <UserCircle2 className="h-14 w-14 text-stone-600" />
+                </div>
+              </div>
+              {/* "You" label */}
+              <div className="absolute bottom-2.5 left-2.5 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+                You
+              </div>
+              {/* Mic indicator */}
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">
+                <Mic className="h-3 w-3" />
+                <span>Live</span>
+              </div>
+            </div>
+
+            {/* Right: AI interviewer panel */}
+            <div
+              className="w-1/2 flex flex-col items-center justify-center p-5 gap-3"
+              style={{ backgroundColor: "#1a1715" }}
+            >
+              {/* AI avatar */}
               <div className="h-12 w-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
                 <span className="text-sm font-bold text-amber-400">AI</span>
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-                  AI Interviewer
-                </p>
-                {/* Waveform */}
-                <div className="flex items-center gap-1 mt-1.5 h-5">
-                  {[0.5, 0.8, 1, 0.7, 0.4, 0.6, 0.9].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-1 rounded-full bg-amber-400"
-                      style={{
-                        height: `${Math.round(h * 18)}px`,
-                        opacity: 0.6 + h * 0.4,
-                      }}
-                    />
-                  ))}
-                </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                AI Interviewer
+              </p>
+              {/* Animated waveform */}
+              <div className="flex items-center gap-1 h-5">
+                {[0.5, 0.8, 1, 0.7, 0.4, 0.6, 0.9].map((h, i) => (
+                  <div
+                    key={i}
+                    className="w-1 rounded-full bg-amber-400"
+                    style={{
+                      height: `${Math.round(h * 18)}px`,
+                      opacity: 0.6 + h * 0.4,
+                    }}
+                  />
+                ))}
               </div>
+              {/* Current question */}
+              <p className="text-xs text-stone-300 text-center leading-relaxed max-w-[180px]">
+                &ldquo;{DEMO_QUESTIONS[0]}&rdquo;
+              </p>
             </div>
           </div>
 
-          {/* Question preview */}
-          <div className="bg-stone-900 rounded-xl p-4">
-            <p className="text-xs text-stone-500 mb-1.5">Current question:</p>
-            <p className="text-base text-stone-200 leading-relaxed">
-              &ldquo;{DEMO_QUESTIONS[0]}&rdquo;
-            </p>
+          {/* Bottom bar: listening + done button */}
+          <div
+            className="flex items-center gap-3 px-4 py-2.5 border-t"
+            style={{ backgroundColor: "#292524", borderColor: "#44403C" }}
+          >
+            <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">
+              <Mic className="h-3 w-3" />
+              Listening…
+            </div>
+            <div className="ml-auto">
+              <span className="text-xs bg-stone-700 text-stone-300 px-3 py-1 rounded cursor-default select-none">
+                Done Answering
+              </span>
+            </div>
           </div>
         </div>
 
@@ -94,8 +137,8 @@ export function PracticeInterviewDemo() {
             group
             mb-6
           ">
-            <Mic className="h-5 w-5" />
-            Begin your interview
+            <UserCircle2 className="h-5 w-5" />
+            Begin video interview
             <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
           </button>
         </Link>
