@@ -4,7 +4,7 @@ import { z } from "zod";
 export const rubricLevelSchema = z.object({
   level: z.number().min(1).max(5),
   label: z.string().min(1, "Label is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  description: z.string(),
   behavioralAnchors: z.array(z.string()).min(1, "At least one behavioral anchor is required"),
 });
 

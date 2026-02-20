@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -42,6 +43,17 @@ enum PanelRole {
   MEMBER
 }
 
+enum PipelineStage {
+  APPLIED
+  SCREENING
+  ASSESSMENT
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
 // ============================================
 // AUTH & USERS
 // ============================================
@@ -53,34 +65,42 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users       User[]
-  assessments Assessment[]
-  candidates  Candidate[]
+  users              User[]
+  assessments        Assessment[]
+  candidates         Candidate[]
+  subscription       Subscription?
+  asyncInterviews    AsyncInterview[]
+  aiInterviewSessions AIInterviewSession[]
+  inventoryBatteries InventoryBattery[]
 
   @@index([slug])
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String    @unique
-  emailVerified  DateTime?
-  image          String?
-  password       String?
-  role           UserRole  @default(RECRUITER)
-  organizationId String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  name             String?
+  email            String    @unique
+  emailVerified    DateTime?
+  image            String?
+  password         String?
+  role             UserRole  @default(RECRUITER)
+  organizationId   String
+  calibrationLevel Int       @default(1)
+  calibrationXP    Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   accounts     Account[]
   sessions     Session[]
 
-  assessmentsCreated Assessment[]
-  evaluations        Evaluation[]
-  interviewPanels    InterviewPanel[]
+  assessmentsCreated  Assessment[]
+  evaluations         Evaluation[]
+  interviewPanels     InterviewPanel[]
   calibrationAttempts CalibrationAttempt[]
-  reliabilityScores  ReliabilityScore[]
+  reliabilityScores   ReliabilityScore[]
+  asyncInterviews     AsyncInterview[]
+  inventoryBatteriesCreated InventoryBattery[] @relation("BatteryCreator")
 
   @@index([email])
   @@index([organizationId])
@@ -145,11 +165,13 @@ model Assessment {
   organization Organization @relation(fields: [organizationId], references: [id])
   createdBy    User         @relation(fields: [createdById], references: [id])
 
-  competencies Competency[]
-  questions    Question[]
-  interviews   Interview[]
-  biasReports  BiasReport[]
-  reliabilityScores ReliabilityScore[]
+  competencies        Competency[]
+  questions           Question[]
+  interviews          Interview[]
+  biasReports         BiasReport[]
+  reliabilityScores   ReliabilityScore[]
+  asyncInterviews     AsyncInterview[]
+  aiInterviewSessions AIInterviewSession[]
 
   @@index([organizationId])
   @@index([createdById])
@@ -157,13 +179,13 @@ model Assessment {
 }
 
 model Competency {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
   description  String? @db.Text
   assessmentId String
 
-  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  questions  Question[]
+  assessment           Assessment           @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questions            Question[]
   calibrationExercises CalibrationExercise[]
 
   @@index([assessmentId])
@@ -177,10 +199,11 @@ model Question {
   assessmentId String
   order        Int          @default(0)
 
-  competency  Competency   @relation(fields: [competencyId], references: [id], onDelete: Cascade)
-  assessment  Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  rubricLevels RubricLevel[]
-  evaluations  Evaluation[]
+  competency     Competency      @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  assessment     Assessment      @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  rubricLevels   RubricLevel[]
+  evaluations    Evaluation[]
+  videoResponses VideoResponse[]
 
   @@index([assessmentId])
   @@index([competencyId])
@@ -205,36 +228,46 @@ model RubricLevel {
 // ============================================
 
 model Candidate {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   name           String
   email          String
   phone          String?
   resumeUrl      String?
   organizationId String
-  createdAt      DateTime @default(now())
+  pipelineStage  PipelineStage @default(APPLIED)
+  notes          String?       @db.Text
+  lastActivityAt DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-  organization Organization      @relation(fields: [organizationId], references: [id])
+  organization Organization       @relation(fields: [organizationId], references: [id])
   interviews   Interview[]
   feedbacks    CandidateFeedback[]
+  invites      CandidateInvite[]
 
   @@index([organizationId])
   @@index([email])
+  @@index([organizationId, pipelineStage])
+  @@index([organizationId, createdAt])
 }
 
 model Interview {
-  id           String          @id @default(cuid())
-  assessmentId String
-  candidateId  String
-  status       InterviewStatus @default(SCHEDULED)
-  scheduledAt  DateTime?
-  completedAt  DateTime?
-  createdAt    DateTime        @default(now())
+  id             String          @id @default(cuid())
+  assessmentId   String
+  candidateId    String
+  status         InterviewStatus @default(SCHEDULED)
+  scheduledAt    DateTime?
+  completedAt    DateTime?
+  recommendation String?
+  notes          String?         @db.Text
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
-  assessment Assessment        @relation(fields: [assessmentId], references: [id])
-  candidate  Candidate          @relation(fields: [candidateId], references: [id])
-  panels     InterviewPanel[]
+  assessment  Assessment         @relation(fields: [assessmentId], references: [id])
+  candidate   Candidate          @relation(fields: [candidateId], references: [id])
+  panels      InterviewPanel[]
   evaluations Evaluation[]
-  feedbacks  CandidateFeedback[]
+  feedbacks   CandidateFeedback[]
 
   @@index([assessmentId])
   @@index([candidateId])
@@ -262,6 +295,7 @@ model Evaluation {
   score       Int // 1-5
   notes       String?  @db.Text
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
   evaluator User      @relation(fields: [evaluatorId], references: [id])
@@ -299,17 +333,17 @@ model CandidateFeedback {
 // ============================================
 
 model CalibrationExercise {
-  id              String @id @default(cuid())
+  id              String   @id @default(cuid())
   title           String
   competencyId    String
   videoUrl        String?
-  description     String @db.Text
-  sampleResponse  String @db.Text
+  description     String   @db.Text
+  sampleResponse  String   @db.Text
   expertScore     Int // 1-5
-  expertRationale String @db.Text
+  expertRationale String   @db.Text
   createdAt       DateTime @default(now())
 
-  competency Competency          @relation(fields: [competencyId], references: [id])
+  competency Competency           @relation(fields: [competencyId], references: [id])
   attempts   CalibrationAttempt[]
 
   @@index([competencyId])
@@ -361,4 +395,280 @@ model ReliabilityScore {
 
   @@index([assessmentId])
   @@index([evaluatorId])
+}
+
+// ============================================
+// SUBSCRIPTION
+// ============================================
+
+model Subscription {
+  id             String    @id @default(cuid())
+  organizationId String    @unique
+  plan           String    @default("FREE")
+  aiCredits      Int       @default(50)
+  renewsAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+}
+
+// ============================================
+// ASYNC VIDEO INTERVIEWS (Flowmingo-inspired)
+// ============================================
+
+enum AsyncInterviewStatus {
+  DRAFT
+  SENT
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+}
+
+enum VideoResponseStatus {
+  PENDING
+  RECORDING
+  SUBMITTED
+  REVIEWED
+}
+
+model AsyncInterview {
+  id               String               @id @default(cuid())
+  assessmentId     String
+  organizationId   String
+  createdById      String
+  title            String
+  instructions     String?              @db.Text
+  timeLimitSeconds Int                  @default(180)    // per question
+  retakesAllowed   Int                  @default(1)
+  deadlineAt       DateTime?
+  status           AsyncInterviewStatus @default(DRAFT)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  assessment   Assessment        @relation(fields: [assessmentId], references: [id])
+  organization Organization      @relation(fields: [organizationId], references: [id])
+  createdBy    User              @relation(fields: [createdById], references: [id])
+  invitations  CandidateInvite[]
+  responses    VideoResponse[]
+
+  @@index([organizationId])
+  @@index([assessmentId])
+}
+
+model CandidateInvite {
+  id               String          @id @default(cuid())
+  asyncInterviewId String
+  candidateId      String?         // null if invite sent before candidate created
+  email            String
+  token            String          @unique @default(cuid())
+  expiresAt        DateTime
+  openedAt         DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime        @default(now())
+
+  asyncInterview AsyncInterview  @relation(fields: [asyncInterviewId], references: [id], onDelete: Cascade)
+  candidate      Candidate?      @relation(fields: [candidateId], references: [id])
+  responses      VideoResponse[]
+  proctorLogs    ProctorLog[]
+
+  @@index([token])
+  @@index([asyncInterviewId])
+}
+
+model VideoResponse {
+  id               String              @id @default(cuid())
+  asyncInterviewId String
+  inviteId         String
+  questionId       String
+  videoUrl         String?             // stored in Vercel Blob / S3
+  transcription    String?             @db.Text
+  aiSuggestedScore Int?                // 1-5 from AI analysis
+  aiInsights       Json?               // { keywords, sentimentScore, starFormat, confidence }
+  evaluatorScore   Int?                // final human score
+  evaluatorNotes   String?             @db.Text
+  duration         Int?                // seconds
+  retakeCount      Int                 @default(0)
+  status           VideoResponseStatus @default(PENDING)
+  submittedAt      DateTime?
+  createdAt        DateTime            @default(now())
+
+  asyncInterview AsyncInterview @relation(fields: [asyncInterviewId], references: [id], onDelete: Cascade)
+  invite         CandidateInvite @relation(fields: [inviteId], references: [id])
+  question       Question        @relation(fields: [questionId], references: [id])
+
+  @@unique([inviteId, questionId])
+  @@index([asyncInterviewId])
+  @@index([inviteId])
+}
+
+model ProctorLog {
+  id               String   @id @default(cuid())
+  inviteId         String
+  eventType        String   // "tab_switch", "fullscreen_exit", "face_not_detected", "copy_attempt"
+  eventData        Json?    // additional context
+  occurredAt       DateTime @default(now())
+
+  invite CandidateInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+
+  @@index([inviteId])
+}
+
+// ============================================
+// AI SYNCHRONOUS INTERVIEW
+// ============================================
+
+model AIInterviewSession {
+  id             String    @id @default(cuid())
+  organizationId String?   // null for practice/demo sessions
+  assessmentId   String?   // null for practice sessions
+  inviteToken    String    @unique @default(cuid())
+  candidateEmail String?
+  candidateName  String?
+
+  // Session state
+  status          String @default("pending") // pending/in_progress/completed/abandoned
+  totalQuestions  Int    @default(4)
+  currentQuestion Int    @default(0)
+
+  // Transcript (array of {role, content, questionIndex} stored as JSON)
+  transcript Json @default("[]")
+
+  // AI evaluation results
+  aiEvaluation Json? // {overallScore, competencyScores, strengths, improvements, recommendation}
+
+  // Timestamps
+  startedAt       DateTime?
+  completedAt     DateTime?
+  durationSeconds Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  assessment   Assessment?   @relation(fields: [assessmentId], references: [id])
+
+  @@index([organizationId])
+  @@index([inviteToken])
+  @@index([assessmentId])
+}
+
+// ============================================
+// ASSESSMENT INVENTORY
+// ============================================
+
+enum InventoryTestType {
+  RIASEC
+  COGNITIVE
+  VRA
+  CREATIVE_THINKING
+  ANALYTICAL_REASONING
+  BIG_FIVE
+}
+
+enum ItemFormat {
+  LIKERT_5
+  FORCED_CHOICE
+  MCQ
+  OPEN_TEXT
+}
+
+model InventoryBattery {
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  description    String?
+  tests          InventoryBatteryTest[]
+  invitations    InventoryInvitation[]
+  createdById    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy    User         @relation("BatteryCreator", fields: [createdById], references: [id])
+
+  @@index([organizationId])
+}
+
+model InventoryBatteryTest {
+  id               String            @id @default(cuid())
+  batteryId        String
+  testType         InventoryTestType
+  order            Int               @default(0)
+  timeLimitSeconds Int?
+
+  battery InventoryBattery @relation(fields: [batteryId], references: [id], onDelete: Cascade)
+
+  @@unique([batteryId, testType])
+}
+
+model InventoryInvitation {
+  id             String    @id @default(cuid())
+  batteryId      String
+  candidateName  String?
+  candidateEmail String?
+  inviteToken    String    @unique @default(cuid())
+  status         String    @default("pending")
+  expiresAt      DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  results        InventoryResult[]
+  proctorEvents  ProctorEvent[]
+  createdAt      DateTime  @default(now())
+
+  battery InventoryBattery @relation(fields: [batteryId], references: [id])
+
+  @@index([batteryId])
+  @@index([inviteToken])
+}
+
+model InventoryResult {
+  id             String            @id @default(cuid())
+  invitationId   String
+  testType       InventoryTestType
+  rawScores      Json
+  scaledScores   Json?
+  bandLabel      String?
+  aiSummary      String?
+  integrityScore Int?
+  integrityFlag  String?
+  completedAt    DateTime          @default(now())
+
+  invitation InventoryInvitation @relation(fields: [invitationId], references: [id])
+
+  @@unique([invitationId, testType])
+  @@index([invitationId])
+}
+
+// ============================================
+// PROCTORING
+// ============================================
+
+enum ProctorEventType {
+  TAB_SWITCH
+  WINDOW_BLUR
+  COPY_ATTEMPT
+  PASTE_ATTEMPT
+  FAST_ANSWER
+  FULLSCREEN_EXIT
+}
+
+enum ProctorSeverity {
+  INFO
+  WARNING
+  VIOLATION
+}
+
+model ProctorEvent {
+  id           String            @id @default(cuid())
+  invitationId String
+  invitation   InventoryInvitation @relation(fields: [invitationId], references: [id])
+  eventType    ProctorEventType
+  severity     ProctorSeverity
+  itemIndex    Int?
+  metadata     Json?
+  occurredAt   DateTime          @default(now())
+
+  @@index([invitationId])
+  @@index([invitationId, severity])
 }

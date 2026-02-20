@@ -11,6 +11,13 @@ import {
   Settings,
   ChevronLeft,
   Menu,
+  UserSearch,
+  Kanban,
+  CalendarCheck,
+  Sparkles,
+  Video,
+  Bot,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,10 +26,17 @@ import { useState } from "react";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Pipeline", href: "/pipeline", icon: Kanban },
+  { title: "Candidates", href: "/candidates", icon: UserSearch },
   { title: "Assessments", href: "/assessments", icon: ClipboardList },
+  { title: "Interviews", href: "/interviews", icon: CalendarCheck },
   { title: "Evaluators", href: "/evaluators", icon: Users },
   { title: "Analytics", href: "/analytics", icon: BarChart3 },
   { title: "Calibration", href: "/calibration", icon: Target },
+  { title: "Video Interviews", href: "/async-interviews", icon: Video },
+  { title: "AI Interviews", href: "/ai-interviews", icon: Bot },
+  { title: "Inventory Tests", href: "/inventory", icon: FlaskConical },
+  { title: "AI Co-Pilot", href: "/copilot", icon: Sparkles },
   { title: "Settings", href: "/settings", icon: Settings },
 ];
 

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AddQuestionDialog } from "@/components/forms/add-question-dialog";
 import { AddCompetencyDialog } from "@/components/forms/add-competency-dialog";
+import { AiGeneratePanel } from "./_components/AiGeneratePanel";
 
 type Assessment = {
   id: string;
@@ -153,10 +154,21 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
           <p className="text-muted-foreground">{assessment.jobTitle}</p>
         </div>
         {assessment.status === "DRAFT" && (
-          <Button onClick={handlePublish} disabled={!canPublish}>
-            <CheckCircle2 className="h-4 w-4 mr-2" />
-            Publish Assessment
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              onClick={handlePublish}
+              disabled={!canPublish}
+              title={!canPublish ? "Add at least one competency with a question to publish" : undefined}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Publish Assessment
+            </Button>
+            {!canPublish && (
+              <p className="text-xs text-muted-foreground">
+                Requires at least one competency &amp; question
+              </p>
+            )}
+          </div>
         )}
       </div>
 
@@ -205,6 +217,21 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
           )}
         </CardContent>
       </Card>
+
+      {/* AI Generate Panel — only shown on DRAFT assessments */}
+      {assessment.status === "DRAFT" && (
+        <AiGeneratePanel
+          assessmentId={resolvedParams!.id}
+          jobTitle={assessment.jobTitle}
+          jobDescription={assessment.jobDescription}
+          department={assessment.department}
+          existingCompetencies={assessment.competencies.map((c) => ({
+            id: c.id,
+            name: c.name,
+          }))}
+          onComplete={fetchAssessment}
+        />
+      )}
 
       {/* Competencies & Questions */}
       <Card>

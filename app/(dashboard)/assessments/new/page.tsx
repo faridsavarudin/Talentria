@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,18 +47,19 @@ export default function NewAssessmentPage() {
     }
   };
 
+  const updateCompetency = (id: string, field: "name" | "description", value: string) => {
+    setCompetencies(prev =>
+      prev.map(c => c.id === id ? { ...c, [field]: value } : c)
+    );
+  };
+
   const onSubmit = async (data: AssessmentCreateInput) => {
     try {
       setIsLoading(true);
-      
-      // Collect competencies from form
+
       const competenciesData = competencies
-        .map((comp) => {
-          const name = (document.getElementById(`competency-name-${comp.id}`) as HTMLInputElement)?.value;
-          const description = (document.getElementById(`competency-desc-${comp.id}`) as HTMLInputElement)?.value;
-          return name ? { name, description: description || undefined } : null;
-        })
-        .filter(Boolean);
+        .filter(c => c.name.trim())
+        .map(c => ({ name: c.name.trim(), description: c.description.trim() || undefined }));
 
       const payload = {
         ...data,
@@ -66,9 +68,7 @@ export default function NewAssessmentPage() {
 
       const response = await fetch("/api/assessments", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -78,10 +78,10 @@ export default function NewAssessmentPage() {
       }
 
       const assessment = await response.json();
+      toast.success("Assessment created successfully");
       router.push(`/assessments/${assessment.id}`);
     } catch (error) {
-      console.error("Error creating assessment:", error);
-      alert(error instanceof Error ? error.message : "Failed to create assessment");
+      toast.error(error instanceof Error ? error.message : "Failed to create assessment");
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +208,8 @@ export default function NewAssessmentPage() {
                   <Input
                     id={`competency-name-${comp.id}`}
                     placeholder="e.g., Technical Problem Solving"
-                    defaultValue={comp.name}
+                    value={comp.name}
+                    onChange={(e) => updateCompetency(comp.id, "name", e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -216,7 +217,8 @@ export default function NewAssessmentPage() {
                   <Input
                     id={`competency-desc-${comp.id}`}
                     placeholder="Brief description of this competency..."
-                    defaultValue={comp.description}
+                    value={comp.description}
+                    onChange={(e) => updateCompetency(comp.id, "description", e.target.value)}
                   />
                 </div>
               </div>

@@ -7,7 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations/auth";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -49,8 +50,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as Record<string, unknown>).role;
-        token.organizationId = (user as Record<string, unknown>).organizationId;
+        token.role = (user as { role: string; organizationId: string }).role as import("@prisma/client").UserRole;
+        token.organizationId = (user as { role: string; organizationId: string }).organizationId;
       }
       return token;
     },
@@ -58,9 +59,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.sub as string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).role = token.role;
+        session.user.role = token.role as any;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).organizationId = token.organizationId;
+        session.user.organizationId = token.organizationId as any;
       }
       return session;
     },

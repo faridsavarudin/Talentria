@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* ── Shadcn/Radix base tokens ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -20,34 +21,188 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: var(--font-inter);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── Score colors (1–5 Likert scale) ── */
+  --color-score-1: var(--score-1);
+  --color-score-1-bg: var(--score-1-bg);
+  --color-score-1-text: var(--score-1-text);
+  --color-score-2: var(--score-2);
+  --color-score-2-bg: var(--score-2-bg);
+  --color-score-2-text: var(--score-2-text);
+  --color-score-3: var(--score-3);
+  --color-score-3-bg: var(--score-3-bg);
+  --color-score-3-text: var(--score-3-text);
+  --color-score-4: var(--score-4);
+  --color-score-4-bg: var(--score-4-bg);
+  --color-score-4-text: var(--score-4-text);
+  --color-score-5: var(--score-5);
+  --color-score-5-bg: var(--score-5-bg);
+  --color-score-5-text: var(--score-5-text);
+
+  /* ── Pipeline stage colors ── */
+  --color-stage-applied: var(--stage-applied);
+  --color-stage-applied-bg: var(--stage-applied-bg);
+  --color-stage-screening: var(--stage-screening);
+  --color-stage-screening-bg: var(--stage-screening-bg);
+  --color-stage-assessment: var(--stage-assessment);
+  --color-stage-assessment-bg: var(--stage-assessment-bg);
+  --color-stage-interview: var(--stage-interview);
+  --color-stage-interview-bg: var(--stage-interview-bg);
+  --color-stage-offer: var(--stage-offer);
+  --color-stage-offer-bg: var(--stage-offer-bg);
+  --color-stage-hired: var(--stage-hired);
+  --color-stage-hired-bg: var(--stage-hired-bg);
+  --color-stage-rejected: var(--stage-rejected);
+  --color-stage-rejected-bg: var(--stage-rejected-bg);
+
+  /* ── ICC reliability colors ── */
+  --color-icc-poor: var(--icc-poor);
+  --color-icc-poor-bg: var(--icc-poor-bg);
+  --color-icc-moderate: var(--icc-moderate);
+  --color-icc-moderate-bg: var(--icc-moderate-bg);
+  --color-icc-good: var(--icc-good);
+  --color-icc-good-bg: var(--icc-good-bg);
+  --color-icc-excellent: var(--icc-excellent);
+  --color-icc-excellent-bg: var(--icc-excellent-bg);
+
+  /* ── Bias alert colors ── */
+  --color-bias-none: var(--bias-none);
+  --color-bias-none-bg: var(--bias-none-bg);
+  --color-bias-monitor: var(--bias-monitor);
+  --color-bias-monitor-bg: var(--bias-monitor-bg);
+  --color-bias-adverse: var(--bias-adverse);
+  --color-bias-adverse-bg: var(--bias-adverse-bg);
+
+  /* ── Brand tokens ── */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+  --color-ai-accent: var(--ai-accent);
+  --color-ai-accent-bg: var(--ai-accent-bg);
 }
 
 :root {
+  /* ── Base radius ── */
   --radius: 0.625rem;
+
+  /* ── Shadcn base palette (indigo-shifted) ── */
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  --foreground: #0f0f23;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #0f0f23;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #1a56db;
+  --popover-foreground: #0f0f23;
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #111827;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #f3f4f6;
-  --accent-foreground: #111827;
-  --destructive: #dc2626;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #eef2ff;
+  --accent-foreground: #4338ca;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #1a56db;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #6366f1;
+
+  /* ── Brand ── */
+  --brand: #6366f1;
+  --brand-foreground: #ffffff;
+  --brand-muted: #eef2ff;
+  --ai-accent: #7c3aed;
+  --ai-accent-bg: #f5f3ff;
+
+  /* ── Score 1: Poor — red ── */
+  --score-1: #ef4444;
+  --score-1-bg: #fef2f2;
+  --score-1-text: #b91c1c;
+
+  /* ── Score 2: Below expectations — orange ── */
+  --score-2: #f97316;
+  --score-2-bg: #fff7ed;
+  --score-2-text: #c2410c;
+
+  /* ── Score 3: Meets expectations — amber ── */
+  --score-3: #f59e0b;
+  --score-3-bg: #fffbeb;
+  --score-3-text: #92400e;
+
+  /* ── Score 4: Exceeds expectations — green ── */
+  --score-4: #22c55e;
+  --score-4-bg: #f0fdf4;
+  --score-4-text: #15803d;
+
+  /* ── Score 5: Outstanding — indigo ── */
+  --score-5: #6366f1;
+  --score-5-bg: #eef2ff;
+  --score-5-text: #4338ca;
+
+  /* ── Pipeline stages ── */
+  --stage-applied: #94a3b8;
+  --stage-applied-bg: #f8fafc;
+  --stage-screening: #3b82f6;
+  --stage-screening-bg: #eff6ff;
+  --stage-assessment: #a855f7;
+  --stage-assessment-bg: #faf5ff;
+  --stage-interview: #6366f1;
+  --stage-interview-bg: #eef2ff;
+  --stage-offer: #22c55e;
+  --stage-offer-bg: #f0fdf4;
+  --stage-hired: #10b981;
+  --stage-hired-bg: #ecfdf5;
+  --stage-rejected: #ef4444;
+  --stage-rejected-bg: #fef2f2;
+
+  /* ── ICC reliability ── */
+  --icc-poor: #ef4444;
+  --icc-poor-bg: #fef2f2;
+  --icc-moderate: #f59e0b;
+  --icc-moderate-bg: #fffbeb;
+  --icc-good: #22c55e;
+  --icc-good-bg: #f0fdf4;
+  --icc-excellent: #3b82f6;
+  --icc-excellent-bg: #eff6ff;
+
+  /* ── Bias alerts ── */
+  --bias-none: #22c55e;
+  --bias-none-bg: #f0fdf4;
+  --bias-monitor: #f59e0b;
+  --bias-monitor-bg: #fffbeb;
+  --bias-adverse: #ef4444;
+  --bias-adverse-bg: #fef2f2;
+}
+
+.dark {
+  --background: #0b0d17;
+  --foreground: #f1f5f9;
+  --card: #131625;
+  --card-foreground: #f1f5f9;
+  --popover: #131625;
+  --popover-foreground: #f1f5f9;
+  --primary: #818cf8;
+  --primary-foreground: #0f172a;
+  --secondary: #1e2535;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1e2535;
+  --muted-foreground: #94a3b8;
+  --accent: #1e2535;
+  --accent-foreground: #a5b4fc;
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #818cf8;
+  --brand: #818cf8;
+  --brand-foreground: #0f172a;
+  --brand-muted: #1e2535;
+  --ai-accent: #a78bfa;
+  --ai-accent-bg: #1a1730;
 }
 
 @layer base {
@@ -57,5 +212,109 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ── Utility: gradient brand button (kept for app interior) ── */
+@layer utilities {
+  .btn-brand-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .btn-brand-gradient:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+  .btn-brand-gradient:active {
+    transform: translateY(0);
+  }
+
+  /* Subtle glass card used in hero mockup */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* Legacy gradient hero (unused on landing, kept for reference) */
+  .hero-gradient {
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, #eef2ff 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, #f5f3ff 0%, transparent 60%),
+                #ffffff;
+  }
+
+  /* ── Amber brand button (landing page) ── */
+  .btn-amber {
+    background: #D97706;
+    color: #FFFFFF;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  }
+  .btn-amber:hover {
+    background: #B45309;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px 0 rgb(217 119 6 / 0.35);
+  }
+  .btn-amber:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* ── Hero dark section ── */
+  .hero-dark {
+    background-color: #1C1917;
+  }
+
+  /* ── Precision grid overlay for dark sections ── */
+  .hero-grid-overlay {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── Stat number: tabular, tight tracking ── */
+  .stat-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.03em;
+  }
+
+  /* ── Wordmark for social proof ── */
+  .wordmark {
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-size: 1.125rem;
+    color: #A8A29E;
+    transition: color 0.15s ease;
+    cursor: default;
+    user-select: none;
+  }
+  .wordmark:hover {
+    color: #78716C;
+  }
+
+  /* ── Amber underline accent for headings ── */
+  .heading-accent::after {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 3px;
+    background: #D97706;
+    margin-top: 0.75rem;
+    border-radius: 2px;
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .btn-amber:hover,
+    .btn-brand-gradient:hover {
+      transform: none;
+    }
   }
 }

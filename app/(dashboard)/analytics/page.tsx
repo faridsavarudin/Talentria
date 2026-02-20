@@ -1,138 +1,163 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireAuth } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
+import { OverviewCards } from "./_components/OverviewCards";
+import { IccReliabilityChart } from "./_components/IccReliabilityChart";
+import { HiringFunnelChart } from "./_components/HiringFunnelChart";
+import { PipelineDistributionChart } from "./_components/PipelineDistributionChart";
 
-export default function AnalyticsPage() {
+export const metadata = {
+  title: "Analytics | AssInt",
+};
+
+// Stage display config shared between charts
+const STAGE_CONFIG = [
+  { stage: "APPLIED",    label: "Applied",    fill: "#94a3b8" },
+  { stage: "SCREENING",  label: "Screening",  fill: "#60a5fa" },
+  { stage: "ASSESSMENT", label: "Assessment", fill: "#a78bfa" },
+  { stage: "INTERVIEW",  label: "Interview",  fill: "#fbbf24" },
+  { stage: "OFFER",      label: "Offer",      fill: "#fb923c" },
+  { stage: "HIRED",      label: "Hired",      fill: "#4ade80" },
+  { stage: "REJECTED",   label: "Rejected",   fill: "#f87171" },
+  { stage: "WITHDRAWN",  label: "Withdrawn",  fill: "#cbd5e1" },
+];
+
+export default async function AnalyticsPage() {
+  const user = await requireAuth();
+  const orgId = user.organizationId;
+
+  const [
+    totalCandidates,
+    totalInterviews,
+    avgReliability,
+    biasAlertCount,
+    reliabilityScores,
+    candidateStageCounts,
+  ] = await Promise.all([
+    // Total candidates (non-rejected, non-withdrawn)
+    prisma.candidate.count({
+      where: { organizationId: orgId },
+    }),
+
+    // Total interviews
+    prisma.interview.count({
+      where: { assessment: { organizationId: orgId } },
+    }),
+
+    // Avg ICC
+    prisma.reliabilityScore.aggregate({
+      where: { assessment: { organizationId: orgId } },
+      _avg: { icc: true },
+    }),
+
+    // Bias alerts = assessments with at least one bias report
+    prisma.assessment.count({
+      where: {
+        organizationId: orgId,
+        biasReports: { some: {} },
+      },
+    }),
+
+    // Per-evaluator reliability scores (latest per evaluator)
+    prisma.user.findMany({
+      where: { organizationId: orgId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        _count: { select: { evaluations: true } },
+        reliabilityScores: {
+          orderBy: { calculatedAt: "desc" },
+          take: 1,
+          select: { icc: true },
+        },
+      },
+    }),
+
+    // Candidate counts grouped by stage
+    prisma.candidate.groupBy({
+      by: ["pipelineStage"],
+      where: { organizationId: orgId },
+      _count: { id: true },
+    }),
+  ]);
+
+  // ── Evaluator ICC chart data ─────────────────────────────────────────────────
+  const iccData = reliabilityScores
+    .filter((u) => u.reliabilityScores.length > 0)
+    .map((u) => ({
+      name: u.name ?? u.email ?? "Unknown",
+      icc: u.reliabilityScores[0].icc,
+      evaluations: u._count.evaluations,
+    }))
+    .sort((a, b) => b.icc - a.icc);
+
+  // ── Pipeline stage counts ────────────────────────────────────────────────────
+  const stageCountMap: Record<string, number> = {};
+  for (const row of candidateStageCounts) {
+    stageCountMap[row.pipelineStage] = row._count.id;
+  }
+
+  // ── Funnel data (active stages only — no rejected/withdrawn) ─────────────────
+  const FUNNEL_STAGES = ["APPLIED", "SCREENING", "ASSESSMENT", "INTERVIEW", "OFFER", "HIRED"];
+
+  const funnelData = FUNNEL_STAGES.map((stage, index) => {
+    const count = stageCountMap[stage] ?? 0;
+    const prevCount = index > 0 ? (stageCountMap[FUNNEL_STAGES[index - 1]] ?? 0) : null;
+    const conversionRate =
+      prevCount != null && prevCount > 0
+        ? (count / prevCount) * 100
+        : null;
+
+    const config = STAGE_CONFIG.find((s) => s.stage === stage)!;
+
+    return {
+      stage,
+      label: config.label,
+      count,
+      conversionRate,
+    };
+  });
+
+  // ── Pie chart data ────────────────────────────────────────────────────────────
+  const pieData = STAGE_CONFIG.map((config) => ({
+    stage: config.stage,
+    label: config.label,
+    count: stageCountMap[config.stage] ?? 0,
+    fill: config.fill,
+  }));
+
+  const avgIcc = avgReliability._avg.icc;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-10">
+      {/* Page header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">
-          Bias detection, adverse impact analysis, and reliability metrics.
+        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Reliability metrics, hiring funnel analysis, and pipeline insights.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Bias Detection</CardTitle>
-            <CardDescription>
-              Adverse impact analysis using the 4/5ths rule
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
-                <div>
-                  <p className="text-sm font-medium">Gender</p>
-                  <p className="text-xs text-muted-foreground">Pass rate ratio: 0.89</p>
-                </div>
-                <span className="text-sm font-medium text-green-700">No Impact</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-yellow-50">
-                <div>
-                  <p className="text-sm font-medium">Ethnicity</p>
-                  <p className="text-xs text-muted-foreground">Pass rate ratio: 0.82</p>
-                </div>
-                <span className="text-sm font-medium text-yellow-700">Monitor</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-red-50">
-                <div>
-                  <p className="text-sm font-medium">Age Group</p>
-                  <p className="text-xs text-muted-foreground">Pass rate ratio: 0.71</p>
-                </div>
-                <span className="text-sm font-medium text-red-700">Adverse Impact</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Section 1: Overview cards */}
+      <section>
+        <OverviewCards
+          totalCandidates={totalCandidates}
+          totalInterviews={totalInterviews}
+          avgIcc={avgIcc}
+          biasAlerts={biasAlertCount}
+        />
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Reliability Trends</CardTitle>
-            <CardDescription>
-              Inter-rater reliability over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-48 rounded-lg border-2 border-dashed text-muted-foreground">
-              Chart visualization will be added in Sprint 2
-            </div>
-          </CardContent>
-        </Card>
+      {/* Section 2: ICC chart + Pipeline distribution */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <IccReliabilityChart data={iccData} />
+        <PipelineDistributionChart data={pieData} />
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Evaluator Bias Scores</CardTitle>
-            <CardDescription>
-              Individual evaluator scoring patterns
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { name: "Sarah Chen", bias: 0.02, direction: "neutral" },
-                { name: "Mike Johnson", bias: -0.15, direction: "lenient" },
-                { name: "Emily Davis", bias: 0.28, direction: "strict" },
-                { name: "Alex Kim", bias: -0.31, direction: "lenient" },
-              ].map((evaluator) => (
-                <div key={evaluator.name} className="flex items-center justify-between">
-                  <span className="text-sm">{evaluator.name}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          Math.abs(evaluator.bias) < 0.1
-                            ? "bg-green-500"
-                            : Math.abs(evaluator.bias) < 0.25
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                        style={{ width: `${Math.min(Math.abs(evaluator.bias) * 200, 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-muted-foreground w-16 text-right">
-                      {evaluator.direction}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Question-Level Analysis</CardTitle>
-            <CardDescription>
-              Questions with highest score variance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { question: "Describe a complex technical problem...", variance: 1.8 },
-                { question: "Tell me about a leadership experience...", variance: 1.5 },
-                { question: "How do you approach code reviews?", variance: 0.9 },
-                { question: "Describe your debugging process...", variance: 0.6 },
-              ].map((q) => (
-                <div key={q.question} className="flex items-center justify-between">
-                  <span className="text-sm truncate max-w-[240px]">{q.question}</span>
-                  <span
-                    className={`text-sm font-mono ${
-                      q.variance > 1.5
-                        ? "text-red-600"
-                        : q.variance > 1.0
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {q.variance.toFixed(1)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Section 3: Hiring funnel */}
+      <section>
+        <HiringFunnelChart data={funnelData} />
+      </section>
     </div>
   );
 }

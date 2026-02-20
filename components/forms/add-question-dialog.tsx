@@ -156,7 +156,7 @@ export function AddQuestionDialog({
       const validRubricLevels = rubricLevels.map((level) => ({
         level: level.level,
         label: level.label,
-        description: level.description || `Level ${level.level} performance`,
+        description: level.description.trim() || `Level ${level.level} performance`,
         behavioralAnchors: level.behavioralAnchors.filter((a) => a.trim() !== ""),
       })).filter(level => level.behavioralAnchors.length > 0);
 

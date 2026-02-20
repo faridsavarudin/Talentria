@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { assessmentCreateSchema } from "@/lib/validations/assessment";
+import { requireApiRole } from "@/lib/api-auth";
 
 // GET /api/assessments - List all assessments
 export async function GET(request: Request) {
@@ -60,14 +61,13 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/assessments - Create new assessment
+// POST /api/assessments - Create new assessment (ADMIN and RECRUITER only)
 export async function POST(request: Request) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const authResult = await requireApiRole(["ADMIN", "RECRUITER"]);
+  if (!authResult.ok) return authResult.response;
 
+  try {
+    const { user: apiUser } = authResult;
     const body = await request.json();
     const parsed = assessmentCreateSchema.safeParse(body);
 
@@ -88,8 +88,8 @@ export async function POST(request: Request) {
         jobDescription,
         department,
         status: "DRAFT",
-        organizationId: (session.user as Record<string, unknown>).organizationId as string,
-        createdById: session.user.id as string,
+        organizationId: apiUser.organizationId,
+        createdById: apiUser.id,
         competencies: {
           create: competencies.map((comp) => ({
             name: comp.name,
