@@ -1,8 +1,8 @@
-# AssInt - Assessment Intelligence Platform
+# Kaleo — Hear every candidate clearly.
 
-**Fair, Consistent, and Bias-Free Structured Interviews**
+**Fair, Consistent, and Bias-Free Structured Hiring**
 
-AssInt is an AI-powered assessment platform that helps organizations conduct structured interviews with real-time analytics on evaluator reliability and bias detection.
+Kaleo is a structured hiring platform that helps organizations conduct calibrated interviews with real-time analytics on evaluator reliability and bias detection.
 
 ---
 
