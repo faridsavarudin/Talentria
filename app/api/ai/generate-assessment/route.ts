@@ -5,11 +5,6 @@ import OpenAI from "openai";
 
 const AI_MODEL = "openai/seed-2-0-mini-260215";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_API_KEY,
-  baseURL: process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1",
-});
-
 const SYSTEM_PROMPT = `You are a senior Industrial-Organizational (I/O) psychologist with 20 years of experience designing structured behavioral interview assessments. You specialize in Behaviorally Anchored Rating Scales (BARS) methodology and evidence-based competency frameworks.
 
 Your role is to create rigorous, unbiased, and legally defensible interview assessments. Follow these principles:
@@ -102,6 +97,11 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
+
+    const openai = new OpenAI({
+      apiKey: process.env.AI_API_KEY,
+      baseURL: process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1",
+    });
 
     const session = await auth();
     if (!session?.user) {
