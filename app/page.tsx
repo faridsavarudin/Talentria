@@ -18,14 +18,6 @@ const HERO_STATS = [
   { value: "4/5ths", label: "adverse impact rule enforced" },
 ];
 
-const COMPANIES = [
-  "ACME CORP",
-  "VERITAS HR",
-  "TALENTEDGE",
-  "RECRUIT.AI",
-  "HIREFAST",
-  "PEOPLE OPS",
-];
 
 const PRICING = [
   {
@@ -737,27 +729,6 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Social proof ── */}
-      <section className="border-y border-stone-200 bg-stone-100 py-8">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-xs font-semibold uppercase tracking-[0.1em] text-stone-400 mb-6">
-            Trusted by people-first companies
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {COMPANIES.map((c, i) => (
-              <span key={c} className="flex items-center gap-10">
-                <span className="text-lg font-bold tracking-[-0.05em] text-stone-300 hover:text-stone-500 transition-colors cursor-default select-none">
-                  {c}
-                </span>
-                {i < COMPANIES.length - 1 && (
-                  <span aria-hidden className="h-4 w-px bg-stone-300 hidden sm:block" />
-                )}
-              </span>
-            ))}
           </div>
         </div>
       </section>
