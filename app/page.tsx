@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PracticeInterviewDemo } from "@/components/landing/PracticeInterviewDemo";
 import { PipelineKanbanDemo } from "@/components/landing/PipelineKanbanDemo";
 import { ASSESSMENT_LIST, COLOR_MAP, ICON_LABEL } from "@/lib/assessments-data";
+import { LogoIcon } from "@/components/brand/logo-icon";
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 const HERO_STATS = [
@@ -80,7 +81,7 @@ const FEATURES = [
     label: "TALENT ACQUISITION",
     labelColor: "text-amber-600",
     headline: "One pipeline. Every role. Zero spreadsheets.",
-    body: "Post a job, invite candidates, and track every application from first touch to offer — inside AssInt. No patchwork of inboxes, sheets, and Slack threads. Your entire hiring operation in one structured workspace.",
+    body: "Post a job, invite candidates, and track every application from first touch to offer — inside Kaleo. No patchwork of inboxes, sheets, and Slack threads. Your entire hiring operation in one structured workspace.",
     points: [
       "Job posting management with status controls",
       "Candidate applications with one-click pipeline movement",
@@ -95,7 +96,7 @@ const FEATURES = [
     label: "TALENT ASSESSMENT",
     labelColor: "text-amber-600",
     headline: "Send tests. Get AI-ranked results. Hire faster.",
-    body: "Invite candidates to complete structured video or text assessments, set a deadline, and let AssInt score and rank every response automatically. Your shortlist is ready before you open the first answer.",
+    body: "Invite candidates to complete structured video or text assessments, set a deadline, and let Kaleo score and rank every response automatically. Your shortlist is ready before you open the first answer.",
     points: [
       "One-click invite to individual or bulk candidates",
       "AI scores every response on a 1–5 BARS scale",
@@ -109,7 +110,7 @@ const FEATURES = [
     label: "ASSESSMENT INVENTORY",
     labelColor: "text-amber-600",
     headline: "Five validated instruments. Ready to deploy.",
-    body: "AssInt ships with a library of five psychometrically validated instruments covering vocational fit, cognitive ability, situational judgment, and analytical aptitude. Every instrument maps to a job role competency framework and generates AI-scored candidate reports. No test development required — just select, send, and review.",
+    body: "Kaleo ships with a library of five psychometrically validated instruments covering vocational fit, cognitive ability, situational judgment, and analytical aptitude. Every instrument maps to a job role competency framework and generates AI-scored candidate reports. No test development required — just select, send, and review.",
     points: [
       "Peer-reviewed psychometric foundations for every instrument",
       "Auto-scored with percentile rankings and narrative summaries",
@@ -123,7 +124,7 @@ const FEATURES = [
     label: "ASSESSMENT BUILDER",
     labelColor: "text-amber-600",
     headline: "Turn a job description into 20 calibrated questions.",
-    body: "Paste any job posting. AssInt maps it to competencies and generates behavioral questions with BARS anchors and scoring rubrics — in under 60 seconds.",
+    body: "Paste any job posting. Kaleo maps it to competencies and generates behavioral questions with BARS anchors and scoring rubrics — in under 60 seconds.",
     points: ["Competency-mapped questions", "BARS scoring rubrics included", "Customizable before sending"],
     visual: <AssessmentBuilderVisual />,
     reverse: true,
@@ -154,7 +155,7 @@ const FEATURES = [
     label: "RELIABILITY ANALYTICS",
     labelColor: "text-teal-600",
     headline: "Know which evaluators you can trust — and which need coaching.",
-    body: "Inter-rater reliability (ICC) tracked in real time. When two evaluators diverge, AssInt surfaces it before a decision is locked.",
+    body: "Inter-rater reliability (ICC) tracked in real time. When two evaluators diverge, Kaleo surfaces it before a decision is locked.",
     points: ["ICC per evaluator pair", "Divergence alerts", "Trend tracking over time"],
     visual: <ICCVisual />,
     reverse: false,
@@ -164,7 +165,7 @@ const FEATURES = [
     label: "AI CO-PILOT",
     labelColor: "text-amber-600",
     headline: "The evaluator's silent second opinion.",
-    body: "While your interviewer talks, AssInt suggests follow-up questions, flags gaps in coverage, and proposes preliminary scores. The human always decides.",
+    body: "While your interviewer talks, Kaleo suggests follow-up questions, flags gaps in coverage, and proposes preliminary scores. The human always decides.",
     points: ["Real-time question suggestions", "Coverage gap detection", "AI-proposed scoring"],
     visual: <AICopilotVisual />,
     reverse: true,
@@ -175,7 +176,7 @@ const FEATURES = [
     label: "ASSESSMENT INTEGRITY",
     labelColor: "text-amber-600",
     headline: "Fair conditions for every candidate. Automatically.",
-    body: "AssInt monitors assessment sessions passively — no invasive video surveillance, no gotcha screenshots. Tab switching, copy-paste attempts, and unusual session patterns are logged as integrity events and surfaced to recruiters in a per-candidate report. Every candidate is assessed under the same conditions, so comparisons are meaningful.",
+    body: "Kaleo monitors assessment sessions passively — no invasive video surveillance, no gotcha screenshots. Tab switching, copy-paste attempts, and unusual session patterns are logged as integrity events and surfaced to recruiters in a per-candidate report. Every candidate is assessed under the same conditions, so comparisons are meaningful.",
     points: [
       "Passive monitoring — no live surveillance or recording",
       "Integrity score (0–100) per candidate with event log",
@@ -506,7 +507,7 @@ function AICopilotVisual() {
         <div className="h-6 w-6 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
           <span className="text-[10px] font-bold text-amber-600">AI</span>
         </div>
-        <span className="text-xs font-semibold text-stone-700">AssInt Co-Pilot</span>
+        <span className="text-xs font-semibold text-stone-700">Kaleo Co-Pilot</span>
         <span className="ml-auto text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Live</span>
       </div>
       <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
@@ -593,10 +594,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-600 text-white font-black text-sm">
-              A
-            </div>
-            <span className="text-base font-bold text-stone-900">AssInt</span>
+            <LogoIcon size={28} theme="light" />
+            <span className="text-base font-bold text-stone-900 tracking-tight">Kaleo</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -647,7 +646,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="mt-7 text-lg text-stone-300 leading-relaxed max-w-lg">
-                AssInt gives your hiring team structured interviews, evaluator calibration,
+                Kaleo gives your hiring team structured interviews, evaluator calibration,
                 and real-time bias detection — so every decision is fair, consistent, and defensible.
               </p>
 
@@ -737,7 +736,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 sm:py-32 bg-white">
         {/* Section opener */}
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-400 mb-3">What AssInt Does</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-400 mb-3">What Kaleo Does</p>
           <h2 className="text-4xl font-extrabold text-stone-900 tracking-tight max-w-lg heading-accent">
             Acquire. Assess. Interview. Decide.
           </h2>
@@ -1023,13 +1022,11 @@ export default function LandingPage() {
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-12">
             <div className="sm:col-span-2 lg:col-span-1">
               <Link href="/" className="flex items-center gap-2.5 mb-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-600 text-white font-black text-xs">
-                  A
-                </div>
-                <span className="text-sm font-bold text-white">AssInt</span>
+                <LogoIcon size={24} theme="dark" />
+                <span className="text-sm font-bold text-white tracking-tight">Kaleo</span>
               </Link>
               <p className="text-sm text-stone-400 leading-relaxed">
-                Assessment Intelligence Platform for fair, consistent, and defensible hiring.
+                Structured hiring platform for fair, calibrated, bias-free decisions.
               </p>
             </div>
 
@@ -1057,7 +1054,7 @@ export default function LandingPage() {
 
           <div className="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-stone-600">
-              &copy; {new Date().getFullYear()} AssInt. All rights reserved.
+              &copy; {new Date().getFullYear()} Kaleo. All rights reserved.
             </p>
             <p className="text-xs text-stone-600">Built for fair hiring.</p>
           </div>

@@ -4,7 +4,7 @@ import { KanbanBoard } from "./_components/KanbanBoard";
 import type { PipelineStage } from "@prisma/client";
 
 export const metadata = {
-  title: "Pipeline | AssInt",
+  title: "Pipeline | Kaleo",
 };
 
 const PAGE_LIMIT = 15;

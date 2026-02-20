@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
+import { LogoIcon } from "@/components/brand/logo-icon";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -68,11 +69,11 @@ export default function RegisterPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg">
-          A
+        <div className="mx-auto mb-4 flex items-center justify-center">
+          <LogoIcon size={44} theme="light" />
         </div>
         <CardTitle className="text-2xl">Create an account</CardTitle>
-        <CardDescription>Get started with AssInt for your team</CardDescription>
+        <CardDescription>Get started with Kaleo for your team</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -6,7 +6,7 @@ import { HiringFunnelChart } from "./_components/HiringFunnelChart";
 import { PipelineDistributionChart } from "./_components/PipelineDistributionChart";
 
 export const metadata = {
-  title: "Analytics | AssInt",
+  title: "Analytics | Kaleo",
 };
 
 // Stage display config shared between charts

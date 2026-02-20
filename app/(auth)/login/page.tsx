@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { LogoIcon } from "@/components/brand/logo-icon";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,11 +51,11 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg">
-          A
+        <div className="mx-auto mb-4 flex items-center justify-center">
+          <LogoIcon size={44} theme="light" />
         </div>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your AssInt account</CardDescription>
+        <CardDescription>Sign in to your Kaleo account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

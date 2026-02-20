@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { LogoIcon } from "@/components/brand/logo-icon";
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -63,12 +64,14 @@ export function Sidebar() {
       >
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4">
-          {!collapsed && (
+          {collapsed ? (
+            <Link href="/dashboard" className="flex items-center justify-center">
+              <LogoIcon size={24} theme="light" />
+            </Link>
+          ) : (
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-                A
-              </div>
-              <span className="text-lg font-bold">AssInt</span>
+              <LogoIcon size={28} theme="light" />
+              <span className="text-lg font-bold tracking-tight">Kaleo</span>
             </Link>
           )}
           <Button
@@ -113,10 +116,8 @@ export function Sidebar() {
           <aside className="absolute left-0 top-0 h-screen w-64 border-r bg-background">
             <div className="flex h-16 items-center px-4">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-                  A
-                </div>
-                <span className="text-lg font-bold">AssInt</span>
+                <LogoIcon size={28} theme="light" />
+                <span className="text-lg font-bold tracking-tight">Kaleo</span>
               </Link>
             </div>
             <Separator />

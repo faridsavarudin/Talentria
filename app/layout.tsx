@@ -3,8 +3,11 @@ import "./globals.css";
 import { Providers } from "@/components/layout/providers";
 
 export const metadata: Metadata = {
-  title: "AssInt - Assessment Intelligence Platform",
-  description: "Make fairer, more consistent hiring decisions with AI-powered structured assessments",
+  title: "Kaleo — Hear every candidate clearly.",
+  description: "Structured hiring platform for fair, calibrated, bias-free decisions",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

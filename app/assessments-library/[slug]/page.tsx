@@ -23,6 +23,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { LogoIcon } from "@/components/brand/logo-icon";
 
 // ── Static generation ─────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ export async function generateMetadata({
   const assessment = ASSESSMENTS[slug];
   if (!assessment) return {};
   return {
-    title: `${assessment.name} | AssInt Assessment Library`,
+    title: `${assessment.name} | Kaleo Assessment Library`,
     description: assessment.tagline,
   };
 }
@@ -67,10 +68,8 @@ export default async function AssessmentDetailPage({
       <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-600 text-white font-black text-sm">
-              A
-            </div>
-            <span className="text-base font-bold text-stone-900">AssInt</span>
+            <LogoIcon size={28} theme="light" />
+            <span className="text-base font-bold text-stone-900 tracking-tight">Kaleo</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -429,13 +428,11 @@ export default async function AssessmentDetailPage({
       <footer className="bg-stone-900 border-t border-stone-800 py-10">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-600 text-white font-black text-xs">
-              A
-            </div>
-            <span className="text-sm font-bold text-white">AssInt</span>
+            <LogoIcon size={24} theme="dark" />
+            <span className="text-sm font-bold text-white tracking-tight">Kaleo</span>
           </Link>
           <p className="text-xs text-stone-500">
-            &copy; {new Date().getFullYear()} AssInt. All rights reserved.
+            &copy; {new Date().getFullYear()} Kaleo. All rights reserved.
           </p>
           <nav className="flex items-center gap-4">
             <Link
