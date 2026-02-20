@@ -218,6 +218,10 @@
   html {
     scroll-behavior: smooth;
   }
+
+  button, [role="button"], a {
+    cursor: pointer;
+  }
 }
 
 /* ── Utility: gradient brand button (kept for app interior) ── */
