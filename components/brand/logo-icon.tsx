@@ -21,18 +21,36 @@ export function LogoIcon({ size = 32, theme = "light", className }: LogoIconProp
       aria-label="Kaleo logo"
       role="img"
     >
-      <rect x="4" y="18" width="6" height="10" rx="2" fill={primary} opacity="0.45" />
-      <rect x="13" y="11" width="6" height="17" rx="2" fill={primary} opacity="0.7" />
-      <rect x="22" y="5" width="6" height="23" rx="2" fill={primary} />
-      <circle cx="25" cy="3" r="2.25" fill={accent} />
+      {/* Source dot — the person / the voice */}
+      <circle cx="7" cy="16" r="3" fill={accent} />
+
+      {/* Arc 1 — inner, strong */}
       <path
-        d="M7 17 L16 10 L25 4"
+        d="M13 9.5 Q17.5 16 13 22.5"
         stroke={primary}
-        strokeWidth="1.25"
+        strokeWidth="2.25"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="2 2"
-        opacity="0.5"
+        fill="none"
+      />
+
+      {/* Arc 2 — mid */}
+      <path
+        d="M17.5 6 Q24 16 17.5 26"
+        stroke={primary}
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.65"
+      />
+
+      {/* Arc 3 — outer, faintest */}
+      <path
+        d="M22 3 Q30.5 16 22 29"
+        stroke={primary}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.3"
       />
     </svg>
   );
