@@ -18,7 +18,22 @@
       "Bash(git commit:*)",
       "Bash(git remote add:*)",
       "Bash(git push:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "WebFetch(domain:walljobs.ai)",
+      "Bash(python3:*)",
+      "Bash(wc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(timeout 60 npx prisma db push:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgres://postgres.cyxobujtthmhxadusjzr:BtKt9s94VTA687bn@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require\" npx prisma db push:*)",
+      "WebFetch(domain:flowmingo.ai)",
+      "Bash(npx prisma validate:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:talent.flowmingo.ai)",
+      "Bash(git -C /Users/farid/kerja/assint status)",
+      "Bash(find:*)",
+      "WebFetch(domain:www.talentics.id)"
     ]
   }
 }
