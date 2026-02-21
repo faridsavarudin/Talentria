@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
@@ -12,6 +13,42 @@ import { ASSESSMENT_LIST, COLOR_MAP, ICON_LABEL } from "@/lib/assessments-data";
 import { LogoIcon } from "@/components/brand/logo-icon";
 
 // ── Data ───────────────────────────────────────────────────────────────────────
+
+const SOCIAL_PROOF_AVATARS = [
+  { initials: "SR", bg: "#6366f1", name: "Sarah R." },
+  { initials: "MK", bg: "#0ea5e9", name: "Marcus K." },
+  { initials: "JL", bg: "#14b8a6", name: "Jess L." },
+  { initials: "AT", bg: "#ec4899", name: "Aiko T." },
+  { initials: "PW", bg: "#f59e0b", name: "Priya W." },
+];
+
+const TESTIMONIALS = [
+  {
+    quote: "Kaleo cut our time-to-shortlist by more than half. The calibration training alone removed the scoring variance we'd been living with for years.",
+    name: "Sarah Reynolds",
+    role: "Head of Talent Acquisition",
+    company: "NovaTech",
+    initials: "SR",
+    bg: "#6366f1",
+  },
+  {
+    quote: "We ran our first structured interview cycle in under a week. The AI-generated questions mapped exactly to our competency framework — no configuration needed.",
+    name: "Marcus Kweku",
+    role: "People Operations Lead",
+    company: "Meridian Digital",
+    initials: "MK",
+    bg: "#0ea5e9",
+  },
+  {
+    quote: "The adverse impact reports finally gave us something defensible to show legal. We flagged a scoring pattern that would have been a lawsuit waiting to happen.",
+    name: "Jessica Lim",
+    role: "Senior HR Business Partner",
+    company: "Corazon Group",
+    initials: "JL",
+    bg: "#14b8a6",
+  },
+];
+
 const HERO_STATS = [
   { value: "94%", label: "reduction in evaluator bias" },
   { value: "3.2×", label: "faster time-to-hire" },
@@ -663,56 +700,112 @@ export default function LandingPage() {
                   </button>
                 </Link>
               </div>
-            </div>
 
-            {/* Right: product screenshot */}
-            <div className="relative">
-              <div
-                className="rounded-2xl ring-1 ring-white/10 overflow-hidden shadow-2xl"
-                style={{ transform: "rotate(0.5deg)" }}
-              >
-                <div className="flex h-9 items-center gap-1.5 border-b border-stone-800 bg-stone-900 px-4">
-                  {["#ef4444", "#f59e0b", "#22c55e"].map((c) => (
-                    <span key={c} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c }} />
-                  ))}
-                  <div className="ml-4 h-4 flex-1 max-w-xs rounded bg-stone-700/80" />
-                </div>
-                <div className="bg-[#0f1117] p-4 sm:p-5">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                    {[
-                      { label: "Assessments", val: "24", color: "text-amber-400" },
-                      { label: "Interviews", val: "12", color: "text-teal-400" },
-                      { label: "Avg. ICC", val: "0.87", color: "text-blue-400" },
-                      { label: "Pending", val: "8", color: "text-stone-300" },
-                    ].map((m) => (
-                      <div key={m.label} className="rounded-xl bg-stone-800/60 border border-stone-700/50 p-3">
-                        <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">{m.label}</p>
-                        <p className={`text-xl font-bold mt-1 tabular-nums ${m.color}`}>{m.val}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="rounded-xl bg-stone-800/60 border border-stone-700/50 p-4">
-                    <p className="text-xs font-semibold text-stone-300 mb-3">Recent Assessments</p>
-                    <div className="space-y-2.5">
-                      {[
-                        { title: "Senior Frontend Engineer", status: "Active", icc: "0.91" },
-                        { title: "Product Manager", status: "Draft", icc: "—" },
-                        { title: "Data Scientist", status: "Active", icc: "0.78" },
-                      ].map((r) => (
-                        <div key={r.title} className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-stone-300">{r.title}</span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[10px] text-stone-500">ICC {r.icc}</span>
-                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${r.status === "Active" ? "bg-teal-900/60 text-teal-400" : "bg-amber-900/60 text-amber-400"}`}>
-                              {r.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+              {/* Social proof */}
+              <div className="mt-10 flex items-center gap-4">
+                <div className="flex -space-x-2.5">
+                  {SOCIAL_PROOF_AVATARS.map((person, i) => (
+                    <div
+                      key={i}
+                      title={person.name}
+                      className="h-9 w-9 rounded-full border-2 border-[#1c1917] flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                      style={{ backgroundColor: person.bg }}
+                    >
+                      {person.initials}
                     </div>
-                  </div>
+                  ))}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    <span className="text-amber-400">200+</span> hiring teams
+                  </p>
+                  <p className="text-xs text-stone-400">trust Kaleo for fair hiring</p>
                 </div>
               </div>
+            </div>
+
+            {/* Right: hero people image + floating cards */}
+            <div className="relative flex items-end justify-center lg:justify-end h-[460px] sm:h-[520px]">
+
+              {/* People photo — bottom-anchored, white bg blends via gradient overlay */}
+              <div className="relative h-full w-full max-w-[520px]">
+                <Image
+                  src="/hero-people.png"
+                  alt="HR professionals reviewing candidate assessments"
+                  fill
+                  className="object-contain object-bottom"
+                  priority
+                  unoptimized
+                />
+                {/* Gradient fade: top blends into dark hero bg */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, #1c1917 0%, transparent 28%, transparent 80%, #1c1917 100%)",
+                  }}
+                />
+                {/* Left side fade */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to right, #1c1917 0%, transparent 20%)",
+                  }}
+                />
+              </div>
+
+              {/* Floating card — top-left: Candidate hired */}
+              <div className="absolute top-4 left-0 sm:left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl px-4 py-3 flex items-center gap-3 min-w-[180px]">
+                <div className="h-9 w-9 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
+                  <svg className="h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Candidate Hired</p>
+                  <p className="text-sm font-bold text-stone-800">Aiko Tanaka</p>
+                  <p className="text-[10px] text-stone-400">Product Manager · ICC 0.91</p>
+                </div>
+              </div>
+
+              {/* Floating card — top-right: Job Role Fit */}
+              <div className="absolute top-4 right-0 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl px-4 py-3 text-center min-w-[120px]">
+                <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wide mb-1">Job Role Fit</p>
+                <div className="relative mx-auto h-16 w-16">
+                  <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e7e5e4" strokeWidth="3" />
+                    <circle
+                      cx="18" cy="18" r="15.5" fill="none"
+                      stroke="#f59e0b" strokeWidth="3"
+                      strokeDasharray="97.4 97.4"
+                      strokeDashoffset="19.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-base font-extrabold text-stone-800">80%</span>
+                </div>
+              </div>
+
+              {/* Floating card — bottom-right: Bias check */}
+              <div className="absolute bottom-8 right-0 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl px-4 py-3 min-w-[200px]">
+                <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wide mb-2">Evaluator Reliability</p>
+                {[
+                  { label: "Communication", pct: 88, color: "bg-teal-500" },
+                  { label: "Problem Solving", pct: 74, color: "bg-amber-400" },
+                  { label: "Leadership", pct: 91, color: "bg-indigo-500" },
+                ].map((c) => (
+                  <div key={c.label} className="mb-1.5">
+                    <div className="flex justify-between mb-0.5">
+                      <span className="text-[10px] text-stone-600">{c.label}</span>
+                      <span className="text-[10px] font-bold text-stone-700">{c.pct}%</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-stone-200">
+                      <div className={`h-1.5 rounded-full ${c.color}`} style={{ width: `${c.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         </div>
@@ -873,6 +966,45 @@ export default function LandingPage() {
 
       {/* ── AI Practice Interview ── */}
       <PracticeInterviewDemo />
+
+      {/* ── Testimonials ── */}
+      <section className="bg-white py-24 sm:py-32">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-400 mb-3">What People Say</p>
+          <h2 className="text-4xl font-extrabold text-stone-900 tracking-tight mb-14">
+            Real teams.
+            <br />Real results.
+          </h2>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="flex flex-col rounded-2xl border border-stone-200 bg-stone-50 p-7 shadow-sm"
+              >
+                {/* Quote */}
+                <p className="text-stone-700 text-sm leading-relaxed flex-1">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+
+                {/* Person */}
+                <div className="mt-6 flex items-center gap-3 pt-5 border-t border-stone-200">
+                  <div
+                    className="h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                    style={{ backgroundColor: t.bg }}
+                  >
+                    {t.initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-stone-900">{t.name}</p>
+                    <p className="text-xs text-stone-500">{t.role} · {t.company}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── How it works ── */}
       <section className="bg-white py-24 sm:py-32">

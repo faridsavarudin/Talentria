@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Brain, Clock, User } from "lucide-react";
+import { ArrowLeft, Brain, Clock, User, ShieldCheck, ShieldAlert, ShieldOff } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import { InventoryTestType } from "@prisma/client";
+import { InventoryTestType, ProctorSeverity } from "@prisma/client";
 
 const TEST_LABELS: Record<InventoryTestType, string> = {
   RIASEC: "RIASEC Career Interests",
@@ -307,6 +307,10 @@ export default async function InvitationResultsPage({
       results: {
         orderBy: { completedAt: "asc" },
       },
+      proctorEvents: {
+        select: { eventType: true, severity: true, occurredAt: true, itemIndex: true },
+        orderBy: { occurredAt: "asc" },
+      },
     },
   });
   if (!invitation) notFound();
@@ -409,6 +413,107 @@ export default async function InvitationResultsPage({
           )}
         </p>
       )}
+
+      {/* ── Integrity / Proctoring Report ── */}
+      {(() => {
+        const events = invitation.proctorEvents;
+        const critical = events.filter((e) => e.severity === ProctorSeverity.VIOLATION).length;
+        const warning = events.filter((e) => e.severity === ProctorSeverity.WARNING).length;
+        const info = events.filter((e) => e.severity === ProctorSeverity.INFO).length;
+
+        const DEDUCTIONS: Record<string, number> = {
+          tab_switch: 5, window_blur: 3, copy_paste_attempt: 25,
+          devtools_open: 30, fullscreen_exit: 8, no_face_detected: 10, multiple_faces: 20,
+        };
+        const integrityScore = Math.max(
+          0,
+          100 - events.reduce((sum, e) => sum + (DEDUCTIONS[e.eventType as string] ?? 5), 0)
+        );
+
+        const riskLevel: "high" | "medium" | "low" = critical > 0 ? "high" : warning >= 2 || info >= 5 ? "medium" : "low";
+
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Assessment Integrity</CardTitle>
+                {events.length === 0 ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    No events
+                  </span>
+                ) : riskLevel === "high" ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                    <ShieldOff className="h-3.5 w-3.5" />
+                    High risk
+                  </span>
+                ) : riskLevel === "medium" ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                    <ShieldAlert className="h-3.5 w-3.5" />
+                    Review recommended
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Low risk
+                  </span>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Score gauge row */}
+              <div className="flex items-center gap-6 rounded-lg bg-slate-50 border border-slate-100 px-4 py-3">
+                <div className="text-center">
+                  <p className="text-2xl font-black text-slate-900 tabular-nums">{events.length === 0 ? 100 : integrityScore}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">/ 100</p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-slate-700 mb-1.5">Integrity Score</p>
+                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${integrityScore >= 80 ? "bg-teal-500" : integrityScore >= 60 ? "bg-amber-500" : "bg-rose-500"}`}
+                      style={{ width: `${events.length === 0 ? 100 : integrityScore}%` }}
+                    />
+                  </div>
+                  <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground">
+                    <span><strong className="text-rose-600">{critical}</strong> critical</span>
+                    <span><strong className="text-amber-600">{warning}</strong> warning</span>
+                    <span><strong className="text-slate-500">{info}</strong> info</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event log */}
+              {events.length > 0 ? (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">Event Log</p>
+                  {events.map((ev, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-md bg-slate-50 border border-slate-100 px-3 py-1.5">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                            ev.severity === ProctorSeverity.VIOLATION ? "bg-rose-500" :
+                            ev.severity === ProctorSeverity.WARNING ? "bg-amber-500" : "bg-slate-400"
+                          }`}
+                        />
+                        <span className="text-xs text-slate-700 capitalize">{(ev.eventType as string).replace(/_/g, " ")}</span>
+                        {ev.itemIndex !== null && (
+                          <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">Q{(ev.itemIndex ?? 0) + 1}</Badge>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{format(ev.occurredAt, "HH:mm:ss")}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  No integrity events recorded. Session appears clean.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
     </div>
   );
 }
