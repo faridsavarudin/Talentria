@@ -57,19 +57,18 @@ export function PracticeInterviewDemo() {
           {/* Split screen */}
           <div className="flex">
             {/* Left: candidate video feed */}
-            <div className="w-1/2 bg-black flex items-center justify-center relative" style={{ minHeight: "200px" }}>
-              {/* Person silhouette placeholder */}
-              <div className="flex flex-col items-center justify-center gap-1 opacity-60">
-                <div className="h-16 w-16 rounded-full bg-stone-800 flex items-center justify-center">
-                  <UserCircle2 className="h-14 w-14 text-stone-600" />
-                </div>
-              </div>
+            <div className="w-1/2 bg-black relative overflow-hidden" style={{ height: "300px" }}>
+              <img 
+                src="/ai-interview-candidate.png"
+                alt="Interview candidate"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
               {/* "You" label */}
-              <div className="absolute bottom-2.5 left-2.5 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+              <div className="absolute bottom-2.5 left-2.5 bg-black/70 text-white text-xs px-2 py-0.5 rounded z-10">
                 You
               </div>
               {/* Mic indicator */}
-              <div className="absolute top-2.5 right-2.5 flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded z-10">
                 <Mic className="h-3 w-3" />
                 <span>Live</span>
               </div>
